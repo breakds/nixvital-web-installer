@@ -44,8 +44,9 @@ def home():
     cfg = FetchUserConfig(DB())
     return render_template("index.html",
                            basic_info=BasicInfo(cfg),
-                           basic_info_message=ExtractMessage(session, 'basic_info_message'))
-
+                           basic_info_message=ExtractMessage(session, 'basic_info_message'),
+                           partition_info=partutils.GetBlockInfo(
+                               session.get('active_device', None)))
 
 
 # TODO(breakds): Add logging.
@@ -59,6 +60,12 @@ def update_basic_info():
         'Successfully updated basic info.')
     db.commit()
 
+    return redirect(url_for('home'))
+
+
+@app.route('/select_device', methods=['GET', 'POST'])
+def select_device():
+    session['active_device'] = request.args.get('name', None)
     return redirect(url_for('home'))
 
 

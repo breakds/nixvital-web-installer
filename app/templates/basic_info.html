@@ -1,0 +1,19 @@
+<form class="ui form attached segment orange" action="/basic_info" method="post">
+  <h2 class="ui dividing header">Basic Information</h2>
+  <div class="field">
+    <label>Username</label>
+    <input type="text" name="username"
+           placeholder="The main user with uid 1000"
+           value="{{ basic_info.username }}">
+  </div>
+  <div class="field">
+    <label>Hostname</label>
+    <input type="text" name="hostname"
+           placeholder="Input your hostname"
+           value="{{ basic_info.hostname }}">
+  </div>
+  <button class="ui orange button" type="submit">Save</button>
+</form>
+<div class="ui bottom attached message {{ basic_info_message.accent }} {{ basic_info_message.visible }}">
+  {{ basic_info_message.text }}
+</div>
