@@ -16,24 +16,35 @@ def Close(exception):
     DB().close()
 
 
+class BasicInfo(object):
+    def __init__(self, cfg):
+        self.username = cfg.get('username', '')
+        self.hostname = cfg.get('hostname', '')
+
+
+def MakeDisplayMessage(text='', accent='positive'):
+    return {
+        'text': text,
+        'accent': accent,
+        'visible': 'visible' if text != '' else 'hidden',
+    }
+
+
+def ExtractMessage(session, key):
+    if key in session:
+        msg = session[key]
+        session.pop(key, None)
+        return msg
+    return MakeDisplayMessage()
+
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
     cfg = FetchUserConfig(DB())
-    username = cfg.get('username', '')
-    hostname = cfg.get('hostname', '')
-
-    basic_info_message = ''
-    if 'basic_info_message' in session:
-        basic_info_message = session['basic_info_message']
-        session.pop('basic_info_message', None)
-
-    basic_info_message_visible = 'visible' if basic_info_message != '' else 'hidden'
-    
     return render_template("index.html",
-                           username=username,
-                           hostname=hostname,
-                           basic_info_message=basic_info_message,
-                           basic_info_message_visible=basic_info_message_visible)
+                           basic_info=BasicInfo(cfg),
+                           basic_info_message=ExtractMessage(session, 'basic_info_message'))
+
 
 
 # TODO(breakds): Add logging.
@@ -43,7 +54,8 @@ def update_basic_info():
     # TODO(breakds): Save only if valid.
     SetUserConfig(db, 'username', request.form.get('username', ''))
     SetUserConfig(db, 'hostname', request.form.get('hostname', ''))
-    session['basic_info_message'] = 'Successfully updated basic info.'
+    session['basic_info_message'] = MakeDisplayMessage(
+        'Successfully updated basic info.')
     db.commit()
 
     return redirect(url_for('home'))
