@@ -1,11 +1,40 @@
 <html>
   <head>
     <title>Nixvital Installer</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <link rel="stylesheet" type="text/css" href="static/style.css">
+    <script
+      src="https://code.jquery.com/jquery-3.1.1.min.js"
+      integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+      crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js" ></script>
   </head>
   <body>
-    {{ text }}
-    <form method="get" action="/change">
-      <button type="submit" class="button">Change</button>
-    </form>
+
+    <div class="ui container">
+      <div class="ui segment">
+        <form class="ui form" action="/basic_info" method="post">
+          <h2 class="ui dividing header">Basic Information</h2>
+          <div class="field">
+            <label>Username</label>
+            <input type="text" name="username"
+                   placeholder="The main user with uid 1000"
+                   value="{{ username }}">
+          </div>
+          <div class="field">
+            <label>Hostname</label>
+            <input type="text" name="hostname"
+                   placeholder="Input your hostname"
+                   value="{{ hostname }}">
+          </div>
+          <button class="ui orange button" type="submit">Save</button>
+        </form>
+        <div class="ui bottom attached positive message {{ basic_info_message_visible }}">
+          {{ basic_info_message }}
+        </div>
+      </div>
+      
+    </div>
+    
   </body>
 </html>
