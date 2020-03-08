@@ -14,7 +14,7 @@ let pkgs = import <nixpkgs> {
 
 in pkgs.mkShell rec {
   name = "pyd";
-  buildInputs = [ python pkgs.sqlitebrowser ];
+  buildInputs = with pkgs; [ python sqlitebrowser parted ];
   shellHook = ''
     export PS1="$(echo -e '\uf3e2') {\[$(tput sgr0)\]\[\033[38;5;228m\]\w\[$(tput sgr0)\]\[\033[38;5;15m\]} (${name}) \\$ \[$(tput sgr0)\]"
   '';
