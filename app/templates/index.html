@@ -12,7 +12,8 @@
   <body>
 
     <div class="ui container">
-      <div class="ui segment">
+
+      <div class="ui segment orange">
         <form class="ui form" action="/basic_info" method="post">
           <h2 class="ui dividing header">Basic Information</h2>
           <div class="field">
@@ -33,8 +34,36 @@
           {{ basic_info_message.text }}
         </div>
       </div>
-      
+
+
+
+      <div class="ui segments">
+        <div class="ui segment blue">
+          <h2 class="ui header">Partition</h2>
+        </div>
+        <div class="ui segment">
+          <div class="ui buttons">
+            <button class="ui button">/dev/sda</button>
+            1          <div class="or"></div>
+            <button class="ui positive button">/dev/sdb</button>
+            <div class="or"></div>
+            <button class="ui button">/dev/nvme01</button>
+          </div>
+        </div>
+        <div class="ui segments">
+          <div class="ui segment">
+            <p>Nested Top</p>
+          </div>
+          <div class="ui segment">
+            <p>Nested Middle</p>
+          </div>
+          <div class="ui segment">
+            <p>Nested Bottom</p>
+          </div>
+        </div>
+      </div>
+
     </div>
-    
+
   </body>
 </html>
