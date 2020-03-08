@@ -34,8 +34,6 @@ def GetBlockInfo(specified=None):
     text = subprocess.check_output(['lsblk', '--json'])
     parsed = json.loads(text)
 
-    print(parsed)
-
     devices = []
     active = None
     for device in parsed['blockdevices']:
