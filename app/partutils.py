@@ -5,13 +5,25 @@ import json
 import subprocess
 
 
-def _DetermineUsage(child):
-    mountpoint = child['mountpoint']
-    if mountpoint is None:
-        return 'Unmounted'
-    elif mountpoint.lower().find('swap') > -1:
-        return 'Swap'
-    return mountpoint
+def _ConstructPart(child):
+    name = '/dev/{}'.format(child['name'])
+    fstype = child['fstype'] if child['fstype'] else 'Unknown'
+    size = child['size']
+    mountpoint = child['mountpoint'] if child['mountpoint'] else 'unmounted'
+    label = child['label'] if child['label'] else 'NOLABEL'
+
+    icon = 'folder'
+    if mountpoint.lower().find('swap') > -1:
+        icon = 'archive'
+
+    return {
+        'name': name,
+        'fstype': fstype,
+        'size': size,
+        'mountpoint': mountpoint,
+        'label': label,
+        'icon': icon,
+    }
 
 
 def GetBlockInfo(specified=None):
@@ -24,14 +36,17 @@ def GetBlockInfo(specified=None):
       name: /dev/sda
       size: 256 GB
       parts:
-        - usage: /
+        - name: /dev/sda1
           fstype: ext4
-          size: 128 GB
-        - usage: swap
-          fstype: swap
-          size: 8 GB
+          size: 128G
+          mountpoint: /home
+          label: NIXOS_HOME
+          icon: folder
+        - name: /dev/sda2
+          ...
     '''
-    text = subprocess.check_output(['lsblk', '--json'])
+    text = subprocess.check_output([
+        'lsblk', '-oNAME,SIZE,FSTYPE,TYPE,LABEL,MOUNTPOINT', '--json'])
     parsed = json.loads(text)
 
     devices = []
@@ -47,35 +62,10 @@ def GetBlockInfo(specified=None):
 
         if (specified is None and active is None) or specified == devices[-1]['name']:
             devices[-1]['active'] = 'active blue'
-            parts = []
-            for child in device.get('children', []):
-                usage = _DetermineUsage(child)
-
-                # TODO(breakds): This is a fake fstype
-                fstype = 'ext4'
-                if usage == 'Swap':
-                    fstype = 'swap'
-                elif usage == 'Unmounted':
-                    fstype = 'unknown'
-
-                icon = 'folder green'
-                if usage == '/boot':
-                    icon = 'rocket green'
-                if usage == 'Unmounted':
-                    icon = 'red eye slash'
-                elif usage == 'Swap':
-                    icon = 'archive green'
-                
-                parts.append({
-                    'usage': usage,
-                    'fstype': fstype,
-                    'size': child['size'],
-                    'icon': icon,
-                })
             active = {
                 'name': devices[-1]['name'],
                 'size': devices[-1]['size'],
-                'parts': parts,
+                'parts': [_ConstructPart(child) for child in device.get('children', [])],
             }
     return {
         'devices': devices,

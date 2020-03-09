@@ -11,14 +11,14 @@
       <div class="item">
         <i class="chart pie icon teal"></i>
         <div class="content">
-          <div class="header">{{ partition_info.active.name }}</div>
+          <div class="header">{{ partition_info.active.name }} </div>
           <div class="description">{{ partition_info.active.size }}</div>
           <div class="list">
             {% for item in partition_info.active.parts %}
             <div class="item">
               <i class="{{ item.icon }} icon"></i>
               <div class="content">
-                <div class="header">{{ item.usage }}</div>
+                <div class="header">{{ item.name }} [{{ item.label }}]</div>
                 <div class="description">{{ item.size }} - {{ item.fstype }}</div>
               </div>
             </div>
