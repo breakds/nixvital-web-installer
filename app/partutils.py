@@ -5,6 +5,9 @@ import json
 import subprocess
 
 
+MOUNT_LOCATIONS = ['/', '/boot', 'swap', '/home', '/var', '/opt']
+
+
 def _ConstructPart(child):
     name = '/dev/{}'.format(child['name'])
     fstype = child['fstype'] if child['fstype'] else 'Unknown'

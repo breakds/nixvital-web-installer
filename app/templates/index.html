@@ -8,12 +8,18 @@
       integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
       crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js" ></script>
+    <script>
+      $(document).ready(function() {
+          $('.ui.dropdown').dropdown();
+      });
+    </script>
   </head>
   <body>
 
     <div class="ui container">
       {% include 'basic_info.html' %}
       {% include 'partition.html' %}
+      {% include 'nixos_config.html' %}
     </div>
 
   </body>
