@@ -16,3 +16,9 @@
 
   <button class="ui blue button" type="submit">Generate</button>
 </form>
+<div class="ui bottom attached message {{ generator_info.message.accent}} {{ generator_info.message.visible }}">
+  <div class="header">
+    {{ generator_info.message.header }}
+  </div>
+  <p>{{ generator_info.message.text }}</p>
+</div>

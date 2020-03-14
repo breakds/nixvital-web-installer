@@ -64,10 +64,16 @@ def GetVitalInfo(cfg, session):
     }
 
 
-def GetGeneratorInfo(cfg):
+def GetGeneratorInfo(cfg, session):
+    message = session.get('generator_message', {
+        'visible': 'hidden',
+        'accent': 'positive',
+    })
+    session.pop('generator_message', None)
     return {
         'machine_list': generator.GetMachineList('/tmp/nixvital'),
         'machine': cfg.get('machine', None),
+        'message': message,
     }
 
 
@@ -82,7 +88,7 @@ def home():
                            partition_info=partutils.GetBlockInfo(
                                session.get('active_device', None)),
                            vital_info=GetVitalInfo(cfg, session),
-                           generator_info=GetGeneratorInfo(cfg))
+                           generator_info=GetGeneratorInfo(cfg, session))
 
 
 # TODO(breakds): Add logging.
@@ -138,6 +144,16 @@ def run_generate():
     db = DB()
     SetUserConfig(db, 'machine', machine)
     db.commit()
+    install_root = '/home/breakds/Downloads/mnt'
+    cfg = FetchUserConfig(db)
+    generator.GenerateHardwareConfig(install_root)
+    generator.SetupNixvital(install_root, '/tmp/nixvital')
+    generator.RewriteConfiguration(
+        install_root,
+        cfg.get('username', None),
+        cfg.get('machine', None),
+        cfg.get('hostname', None))
+    session['generator_message'] = generator.Message()
     return redirect(url_for('home'))
 
 
