@@ -3,6 +3,7 @@
 
 import json
 import subprocess
+import pathlib
 
 
 MOUNT_LOCATIONS = ['/', '/boot', 'swap', '/home', '/var', '/opt']
@@ -74,3 +75,46 @@ def GetBlockInfo(specified=None):
         'devices': devices,
         'active': active,
     }
+
+
+def _Mount(disk, target):
+    target.mkdir(parents=True, exist_ok=True)
+    subprocess.check_call(['mount', disk, target])
+
+
+def ExecutePartition(cfg, install_root):
+    device = cfg.get('/', 'None')
+    if device is None:
+        return False
+
+    install_root = pathlib.Path(install_root)
+
+    try:
+        subprocess.check_call(['parted', '-s', device, 'mklabel', 'gpt'])
+        subprocess.check_call(
+            ['parted', '-s', '-a', 'optimal', device,
+             'mkpart', 'ESP_BOOT', 'fat32', '0%', '512MB'])
+        subprocess.check_call(
+            ['parted', '-s', '-a', 'optimal', device,
+             'mkpart', 'NIXOS_SWAP', 'linux-swap', '512MB', '8704MB'])
+        subprocess.check_call(
+            ['parted', '-s', '-a', 'optimal', device,
+             'mkpart', 'NIXOS_SYS', 'ext4', '8704MB', '100%'])
+        subprocess.check_call(['parted', '-s', device, 'set', '1', 'boot', 'on'])
+        subprocess.check_call(['mkfs.fat', '{}1'.format(device), '-F', '32'])
+        subprocess.check_call(['mkswap', '{}2'.format(device)])
+        subprocess.check_call(['mkfs.ext4', '{}3'.format(device)])
+        try:
+            subprocess.check_call(['umount', '{}1'.format(device)])
+            subprocess.check_call(['umount', '{}3'.format(device)])
+        except subprocess.CalledProcessError:
+            pass
+        _Mount('{}3'.format(device), install_root)
+        _Mount('{}1'.format(device), pathlib.Path(install_root, 'boot'))
+        # TODO(breakds): Add "swapon".
+    except subprocess.CalledProcessError as error:
+        print(error)
+        return False
+
+    return True
+    

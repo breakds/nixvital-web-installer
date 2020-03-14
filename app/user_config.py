@@ -27,6 +27,7 @@ def FetchUserConfig(db):
 def SetUserConfig(db, key, value):
     '''Please remember to call commit() after calling this.
     '''
+    db.cursor().execute('DELETE FROM UserConfig WHERE VarName = "{}"'.format(key))
     db.cursor().execute('REPLACE INTO UserConfig (VarName, VarVal) VALUES("{}", "{}")'.format(
         key, value))
 

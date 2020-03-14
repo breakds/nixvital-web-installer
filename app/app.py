@@ -15,6 +15,9 @@ app = Flask(__name__)
 app.secret_key = b'\xb7\x0b\x86\xc0+\x1a&\xd6 \xdfx\\\x90O\xac\xae'
 
 
+INSTALL_ROOT = '/mnt'
+
+
 @app.teardown_appcontext
 def Close(exception):
     DB().close()
@@ -117,8 +120,13 @@ def propose_mount_table():
     for loc in partutils.MOUNT_LOCATIONS:
         SetUserConfig(db, loc, request.form.get(loc, None))
     db.commit()
-    session['mount_table_message'] = MakeDisplayMessage(
-        'Updated mount table successfully.')
+    cfg = FetchUserConfig(db)
+    if not partutils.ExecutePartition(cfg, INSTALL_ROOT):
+        session['mount_table_message'] = MakeDisplayMessage(
+            'Update mount table failed.', 'negative')
+    else:
+        session['mount_table_message'] = MakeDisplayMessage(
+            'Updated mount table successfully.')
     return redirect(url_for('home'))
 
 
@@ -144,12 +152,11 @@ def run_generate():
     db = DB()
     SetUserConfig(db, 'machine', machine)
     db.commit()
-    install_root = '/home/breakds/Downloads/mnt'
     cfg = FetchUserConfig(db)
-    generator.GenerateHardwareConfig(install_root)
-    generator.SetupNixvital(install_root, '/tmp/nixvital')
+    generator.GenerateHardwareConfig(INSTALL_ROOT)
+    generator.SetupNixvital(INSTALL_ROOT, '/tmp/nixvital')
     generator.RewriteConfiguration(
-        install_root,
+        INSTALL_ROOT,
         cfg.get('username', None),
         cfg.get('machine', None),
         cfg.get('hostname', None))
