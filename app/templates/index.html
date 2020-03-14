@@ -20,6 +20,9 @@
       {% include 'basic_info.html' %}
       {% include 'partition.html' %}
       {% include 'nixos_config.html' %}
+      {% if vital_info.can_proceed %}
+      {% include 'generator.html' %}
+      {% endif %}
     </div>
 
   </body>

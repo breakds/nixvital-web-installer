@@ -9,6 +9,7 @@ from flask import g, Flask, redirect, render_template, request, url_for, session
 from user_config import InitDB, DB, FetchUserConfig, SetUserConfig
 import partutils
 import vitalutils
+import generator
 
 app = Flask(__name__)
 app.secret_key = b'\xb7\x0b\x86\xc0+\x1a&\xd6 \xdfx\\\x90O\xac\xae'
@@ -50,6 +51,7 @@ def GetMountTable(cfg):
 
 def GetVitalInfo(cfg, session):
     message = session.get('nixvital_repo_message', None)
+    session.pop('nixvital_repo_message', None)
     if message is None:
         if vitalutils.HasNixvitalDir('/tmp'):
             message = vitalutils.Message('success')
@@ -58,6 +60,14 @@ def GetVitalInfo(cfg, session):
     return {
         'repo': cfg.get('nixvital_repo', vitalutils.DEFAULT_REPO),
         'message': message,
+        'can_proceed': vitalutils.HasNixvitalDir('/tmp')
+    }
+
+
+def GetGeneratorInfo(cfg):
+    return {
+        'machine_list': generator.GetMachineList('/tmp/nixvital'),
+        'machine': cfg.get('machine', None),
     }
 
 
@@ -71,7 +81,8 @@ def home():
                            mount_table_message=ExtractMessage(session, 'mount_table_message'),
                            partition_info=partutils.GetBlockInfo(
                                session.get('active_device', None)),
-                           vital_info=GetVitalInfo(cfg, session))
+                           vital_info=GetVitalInfo(cfg, session),
+                           generator_info=GetGeneratorInfo(cfg))
 
 
 # TODO(breakds): Add logging.
@@ -118,6 +129,15 @@ def clone_nixvital():
     db.commit()
     session['nixvital_repo_message'] = vitalutils.Message('success')
     # TODO(breakds): Set success message.
+    return redirect(url_for('home'))
+
+
+@app.route('/generate', methods=['GET', 'POST'])
+def run_generate():
+    machine = request.form.get('machine')
+    db = DB()
+    SetUserConfig(db, 'machine', machine)
+    db.commit()
     return redirect(url_for('home'))
 
 

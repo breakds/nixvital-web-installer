@@ -1,0 +1,18 @@
+<form class="ui form attached segment teal" action="/generate" method="post">
+  <h2 class="ui dividing header">Generate</h2>
+  <div class="field">
+    <label>Select A Machine</label>
+    <select class="ui fluid dropdown" name="machine">
+      <option value="none" {{ "selected" if generator_info.machine == None else "" }}>
+        None
+      </option>
+      {% for machine in generator_info.machine_list %}
+      <option value="{{ machine }}" {{ "selected" if machine == generator_info.machine else "" }}>
+        {{ machine }}
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <button class="ui blue button" type="submit">Generate</button>
+</form>
