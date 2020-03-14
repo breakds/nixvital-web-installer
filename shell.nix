@@ -11,6 +11,7 @@ let pkgs = import <nixpkgs> {
       click
       flask
       psutil
+      GitPython
     ]);
 
 in pkgs.mkShell rec {

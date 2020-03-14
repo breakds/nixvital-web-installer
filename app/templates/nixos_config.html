@@ -1,10 +1,18 @@
-<form class="ui form attached segment olive">
+<form class="ui form attached segment olive" action="/clone_nixvital" method="post">
   <h2 class="ui dividing header">NixOS Configuration</h2>
   <div class="field">
     <label>Nixvital Repository</label>
     <div class="ui action input">
-      <input type="text" value={{ vital_info.repo }}>
-      <button class="ui button">Clone Again</button>
+      <input type="text" name="nixvital_url" value={{ vital_info.repo }}>
+      <button class="ui button olive">
+        Clone
+      </button>
     </div>
   </div>
+</form>
+<div class="ui bottom attached message {{ vital_info.message.accent}}">
+  <div class="header">
+    {{ vital_info.message.header }}
+  </div>
+  <p>{{ vital_info.message.text }}</p>
 </div>

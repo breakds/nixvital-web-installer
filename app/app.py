@@ -2,6 +2,7 @@
 
 import os
 import sqlite3
+import click
 
 from flask import g, Flask, redirect, render_template, request, url_for, session
 
@@ -47,9 +48,16 @@ def GetMountTable(cfg):
     return mount_table
 
 
-def GetVitalInfo(cfg):
+def GetVitalInfo(cfg, session):
+    message = session.get('nixvital_repo_message', None)
+    if message is None:
+        if vitalutils.HasNixvitalDir('/tmp'):
+            message = vitalutils.Message('success')
+        else:
+            message = vitalutils.Message()
     return {
         'repo': cfg.get('nixvital_repo', vitalutils.DEFAULT_REPO),
+        'message': message,
     }
 
 
@@ -63,7 +71,7 @@ def home():
                            mount_table_message=ExtractMessage(session, 'mount_table_message'),
                            partition_info=partutils.GetBlockInfo(
                                session.get('active_device', None)),
-                           vital_info=GetVitalInfo(cfg))
+                           vital_info=GetVitalInfo(cfg, session))
 
 
 # TODO(breakds): Add logging.
@@ -97,6 +105,29 @@ def propose_mount_table():
     return redirect(url_for('home'))
 
 
-if __name__ == '__main__':
-    InitDB(app)
+@app.route('/clone_nixvital', methods=['GET', 'POST'])
+def clone_nixvital():
+    path = vitalutils.CloneNixvital('/tmp', request.form.get('nixvital_url'))
+    if path is None:
+        session['nixvital_repo_message'] = vitalutils.Message('fail')
+        # TODO(breakds): Set error message header
+        return redirect(url_for('home'))
+    db = DB()
+    SetUserConfig(db, 'nixvital_repo', request.form.get('nixvital_url'))
+    SetUserConfig(db, 'nixvital_local', path)
+    db.commit()
+    session['nixvital_repo_message'] = vitalutils.Message('success')
+    # TODO(breakds): Set success message.
+    return redirect(url_for('home'))
+
+
+@click.command()
+@click.option('--default_nixvital_url', default="https://github.com/breakds/nixvital.git",
+              type=click.STRING)
+def main(default_nixvital_url):
+    InitDB(app, default_nixvital_url)
     app.run()
+
+
+if __name__ == '__main__':
+    main()

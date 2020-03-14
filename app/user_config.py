@@ -31,7 +31,7 @@ def SetUserConfig(db, key, value):
         key, value))
 
 
-def InitDB(app):
+def InitDB(app, default_nixvital_url):
     if not DB_PATH.exists():
         # Need to `with` this context since this is not a request
         # handler, so that we need this to access `g` in DB()
@@ -40,5 +40,5 @@ def InitDB(app):
             # This creates the table `UserConfig` in the database.
             with app.open_resource('schema.sql', mode='r') as f:
                 db.cursor().executescript(f.read())
-            db.execute('INSERT INTO UserConfig (VarName, VarVal) VALUES ("text", "This is fun!")')
+            SetUserConfig(db, 'nixvital_repo', default_nixvital_url)
             db.commit()
