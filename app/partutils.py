@@ -82,6 +82,16 @@ def _Mount(disk, target):
     subprocess.check_call(['mount', disk, target])
 
 
+def _IsNVME(device):
+    return device.lower().find('nvme') > -1
+
+
+def _GetPart(device, num):
+    if _IsNVME(device):
+        return '{}p{}'.format(device, num)
+    return '{}{}'.format(device, num)
+
+
 def ExecutePartition(cfg, install_root):
     device = cfg.get('/', 'None')
     if device is None:
@@ -90,6 +100,7 @@ def ExecutePartition(cfg, install_root):
     install_root = pathlib.Path(install_root)
 
     try:
+        # TODO(breakds): Check /proc/swap and swapoff everything, and umount everything.
         subprocess.check_call(['parted', '-s', device, 'mklabel', 'gpt'])
         subprocess.check_call(
             ['parted', '-s', '-a', 'optimal', device,
@@ -100,18 +111,21 @@ def ExecutePartition(cfg, install_root):
         subprocess.check_call(
             ['parted', '-s', '-a', 'optimal', device,
              'mkpart', 'NIXOS_SYS', 'ext4', '8704MB', '100%'])
+        part_root = _GetPart(device, 3)
+        part_swap = _GetPart(device, 2)
+        part_boot = _GetPart(device, 1)
         subprocess.check_call(['parted', '-s', device, 'set', '1', 'boot', 'on'])
-        subprocess.check_call(['mkfs.fat', '{}1'.format(device), '-F', '32'])
-        subprocess.check_call(['mkswap', '{}2'.format(device)])
-        subprocess.check_call(['mkfs.ext4', '{}3'.format(device)])
+        subprocess.check_call(['mkfs.fat', part_boot, '-F', '32'])
+        subprocess.check_call(['mkswap', part_swap])
+        subprocess.check_call(['mkfs.ext4', '-F', part_root])
         try:
-            subprocess.check_call(['umount', '{}1'.format(device)])
-            subprocess.check_call(['umount', '{}3'.format(device)])
+            subprocess.check_call(['umount', part_boot])
+            subprocess.check_call(['umount', part_root])
         except subprocess.CalledProcessError:
             pass
-        _Mount('{}3'.format(device), install_root)
-        _Mount('{}1'.format(device), pathlib.Path(install_root, 'boot'))
-        # TODO(breakds): Add "swapon".
+        _Mount(part_root, install_root)
+        _Mount(part_boot, pathlib.Path(install_root, 'boot'))
+        subprocess.check_call(['swapon', part_swap])
     except subprocess.CalledProcessError as error:
         print(error)
         return False
