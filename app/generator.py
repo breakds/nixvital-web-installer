@@ -38,7 +38,8 @@ def SetupNixvital(install_root, vital_dir):
     vital_symlink.symlink_to(pathlib.Path('../../opt/nixvital'))
 
 
-def RewriteConfiguration(install_root, username, machine, hostname):
+def RewriteConfiguration(install_root, username, machine, hostname,
+                         weride_account, fullname):
     # TODO(breakds) Use nixos-version to get the NixOS version first
     #   ret = subprocess.run(['nixos-version'], capture_output=True)
     #   print(ret.stdout)
@@ -56,6 +57,8 @@ def RewriteConfiguration(install_root, username, machine, hostname):
         out.write('    ./nixvital/machines/{}\n'.format(machine))
         out.write('  ];\n\n')
         out.write('  vital.mainUser = "{}";\n'.format(username))
+        out.write('  vital.weride.account = "{}";\n'.format(weride_account))
+        out.write('  vital.weride.gitUserName = "{}";\n'.format(fullname))
         out.write('  networking.hostName = "{}";\n'.format(hostname))
         out.write('  networking.hostId = "{}";\n'.format(machine_id))
         out.write('\n')

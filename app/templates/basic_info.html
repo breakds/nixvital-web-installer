@@ -22,6 +22,31 @@
       </a>
     </div>
   </div>
+  
+  <div class="field">
+    <div class="ui right labeled left input">
+      <input type="text"
+             name="weride_account"
+             placeholder="Your weride account (e.g. yiqing.yang)"
+             value="{{ basic_info.weride_account }}">
+      <a class="ui tag label" type="submit">
+        Weride Account
+      </a>
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="ui right labeled left input">
+      <input type="text"
+             name="fullname"
+             placeholder="Your full name (e.g. Break Yang)"
+             value="{{ basic_info.fullname }}">
+      <a class="ui tag label" type="submit">
+        Full Name
+      </a>
+    </div>
+  </div>
+  
   <button class="ui orange button" type="submit">Save</button>
 </form>
 <div class="ui bottom attached message {{ basic_info_message.accent }} {{ basic_info_message.visible }}">

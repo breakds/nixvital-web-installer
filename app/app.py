@@ -27,6 +27,8 @@ class BasicInfo(object):
     def __init__(self, cfg):
         self.username = cfg.get('username', '')
         self.hostname = cfg.get('hostname', '')
+        self.weride_account = cfg.get('weride.account', '')
+        self.fullname = cfg.get('fullname', '')
 
 
 def MakeDisplayMessage(text='', accent='positive'):
@@ -101,6 +103,8 @@ def update_basic_info():
     # TODO(breakds): Save only if valid.
     SetUserConfig(db, 'username', request.form.get('username', ''))
     SetUserConfig(db, 'hostname', request.form.get('hostname', ''))
+    SetUserConfig(db, 'weride.account', request.form.get('weride_account', ''))
+    SetUserConfig(db, 'fullname', request.form.get('fullname', ''))
     session['basic_info_message'] = MakeDisplayMessage(
         'Successfully updated basic info.')
     db.commit()
@@ -159,7 +163,9 @@ def run_generate():
         INSTALL_ROOT,
         cfg.get('username', None),
         cfg.get('machine', None),
-        cfg.get('hostname', None))
+        cfg.get('hostname', None),
+        cfg.get('weride_account', None),
+        cfg.get('fullname', None))
     session['generator_message'] = generator.Message()
     return redirect(url_for('home'))
 
