@@ -6,10 +6,10 @@ import click
 
 from flask import g, Flask, redirect, render_template, request, url_for, session
 
-from user_config import InitDB, DB, FetchUserConfig, SetUserConfig
-import partutils
-import vitalutils
-import generator
+from app.user_config import InitDB, DB, FetchUserConfig, SetUserConfig
+import app.partutils as partutils
+import app.vitalutils as vitalutils
+import app.generator as generator
 
 app = Flask(__name__)
 app.secret_key = b'\xb7\x0b\x86\xc0+\x1a&\xd6 \xdfx\\\x90O\xac\xae'

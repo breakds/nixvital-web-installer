@@ -2,7 +2,7 @@ import pathlib
 import subprocess
 import shutil
 
-import vitalutils
+import app.vitalutils as vitalutils
 
 def GetMachineList(vital_dir):
     result = []
