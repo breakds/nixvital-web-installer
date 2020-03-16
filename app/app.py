@@ -164,7 +164,7 @@ def run_generate():
         cfg.get('username', None),
         cfg.get('machine', None),
         cfg.get('hostname', None),
-        cfg.get('weride_account', None),
+        cfg.get('weride.account', None),
         cfg.get('fullname', None))
     session['generator_message'] = generator.Message()
     return redirect(url_for('home'))
