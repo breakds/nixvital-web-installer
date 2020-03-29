@@ -8,6 +8,7 @@ let pkgs = import <nixpkgs> {
     };
 
     python = pkgs.python3.withPackages (python-packages: with python-packages; [
+      setuptools
       click
       flask
       psutil

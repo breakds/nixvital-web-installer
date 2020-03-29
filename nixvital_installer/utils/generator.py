@@ -2,7 +2,7 @@ import pathlib
 import subprocess
 import shutil
 
-import app.vitalutils as vitalutils
+from nixvital_installer.utils import vitalutils
 
 def GetMachineList(vital_dir):
     result = []
