@@ -3,8 +3,9 @@
 import os
 import sqlite3
 import click
+import yaml
 
-from flask import g, Flask, redirect, render_template, request, url_for, session
+from flask import current_app, g, Flask, redirect, render_template, request, url_for, session
 
 from .utils.user_config import InitDB, DB, FetchUserConfig, SetUserConfig
 from .utils import partutils
@@ -13,6 +14,7 @@ from .utils import generator
 
 app = Flask(__name__)
 app.secret_key = b'\xb7\x0b\x86\xc0+\x1a&\xd6 \xdfx\\\x90O\xac\xae'
+app.config['extra_fields'] = []
 
 
 INSTALL_ROOT = '/mnt'
@@ -27,6 +29,14 @@ class BasicInfo(object):
     def __init__(self, cfg):
         self.username = cfg.get('username', '')
         self.hostname = cfg.get('hostname', '')
+        self.extra_fields = []
+        for field in current_app.config.get('extra_fields', []):
+            self.extra_fields.append({
+                'key': field['key'],
+                'description': field['description'],
+                'name': field['name'],
+                'value': cfg.get(field['key'], ''),
+            })
 
 
 def MakeDisplayMessage(text='', accent='positive'):
@@ -83,7 +93,7 @@ def GetGeneratorInfo(cfg, session):
 @app.route('/', methods=['GET', 'POST'])
 def home():
     cfg = FetchUserConfig(DB())
-    return render_template("index.html",
+    return render_template('index.html',
                            basic_info=BasicInfo(cfg),
                            basic_info_message=ExtractMessage(session, 'basic_info_message'),
                            mount_table=GetMountTable(cfg),
@@ -101,6 +111,8 @@ def update_basic_info():
     # TODO(breakds): Save only if valid.
     SetUserConfig(db, 'username', request.form.get('username', ''))
     SetUserConfig(db, 'hostname', request.form.get('hostname', ''))
+    for field in current_app.config.get('extra_fields', []):
+        SetUserConfig(db, field['key'], request.form.get(field['key'], ''))
     session['basic_info_message'] = MakeDisplayMessage(
         'Successfully updated basic info.')
     db.commit()
@@ -155,19 +167,40 @@ def run_generate():
     cfg = FetchUserConfig(db)
     generator.GenerateHardwareConfig(INSTALL_ROOT)
     generator.SetupNixvital(INSTALL_ROOT, '/tmp/nixvital')
+    extra_fields_map = []
+    for field in current_app.config.get('extra_fields', []):
+        extra_fields_map.append({
+            'variable': field['nix'],
+            'value': cfg.get(field['key'], ''),
+        })
     generator.RewriteConfiguration(
         INSTALL_ROOT,
         cfg.get('username', None),
         cfg.get('machine', None),
-        cfg.get('hostname', None))
+        cfg.get('hostname', None), extra_fields_map)
     session['generator_message'] = generator.Message()
     return redirect(url_for('home'))
 
 
+# Example extra filed yaml file
+#
+# - key: "gmail_account"
+#   name: "Gmail Account"
+#   nix: "vital.gmail_account"
+#   description: "Your gmail account e.g. (break.yang)"
+# - key: "fullname"
+#   name: "Full Name"
+#   nix: "vital.weride.gitUserName"
+#   description: "Your full name (e.g. Break Yang)"
 @click.command()
-@click.option('--default_nixvital_url', default="https://github.com/breakds/nixvital.git",
-              type=click.STRING)
-def main(default_nixvital_url):
+@click.option('--default_nixvital_url', default='https://github.com/breakds/nixvital.git',
+              type=click.STRING, help='The url to the default nixvital repository.')
+@click.option('--extra_field_yaml', '-e', default='',
+              type=click.Path(), help='The yaml file that contains extra fields to handle.')
+def main(default_nixvital_url, extra_field_yaml):
+    if extra_field_yaml:
+        with open(extra_field_yaml, 'r') as f:
+            app.config.update(extra_fields=yaml.load(f, Loader=yaml.Loader))
     InitDB(app, default_nixvital_url)
     app.run()
 

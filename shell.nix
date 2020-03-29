@@ -13,6 +13,7 @@ let pkgs = import <nixpkgs> {
       flask
       psutil
       GitPython
+      pyyaml
     ]);
 
 in pkgs.mkShell rec {

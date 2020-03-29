@@ -22,6 +22,19 @@
       </a>
     </div>
   </div>
+  {% for item in basic_info.extra_fields %}
+  <div class="field">
+    <div class="ui right labeled left input">
+      <input type="text"
+             name="{{ item.key }}"
+             placeholder="{{ item.description }}"
+             value="{{ item.value }}">
+      <a class="ui tag label" type="submit">
+        {{ item.name }}
+      </a>
+    </div>
+  </div>
+  {% endfor %}
   <button class="ui orange button" type="submit">Save</button>
 </form>
 <div class="ui bottom attached message {{ basic_info_message.accent }} {{ basic_info_message.visible }}">

@@ -38,7 +38,7 @@ def SetupNixvital(install_root, vital_dir):
     vital_symlink.symlink_to(pathlib.Path('../../opt/nixvital'))
 
 
-def RewriteConfiguration(install_root, username, machine, hostname):
+def RewriteConfiguration(install_root, username, machine, hostname, extra_fields_map=[]):
     # TODO(breakds) Use nixos-version to get the NixOS version first
     #   ret = subprocess.run(['nixos-version'], capture_output=True)
     #   print(ret.stdout)
@@ -58,6 +58,8 @@ def RewriteConfiguration(install_root, username, machine, hostname):
         out.write('  vital.mainUser = "{}";\n'.format(username))
         out.write('  networking.hostName = "{}";\n'.format(hostname))
         out.write('  networking.hostId = "{}";\n'.format(machine_id))
+        for item in extra_fields_map:
+            out.write('  {} = "{}";\n'.format(item['variable'], item['value']))
         out.write('\n')
         out.write('  # This value determines the NixOS release with which your system is to be\n')
         out.write('  # compatible, in order to avoid breaking some software such as database\n')
