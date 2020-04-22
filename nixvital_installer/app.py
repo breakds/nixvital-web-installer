@@ -170,7 +170,7 @@ def run_generate():
     extra_fields_map = []
     for field in current_app.config.get('extra_fields', []):
         extra_fields_map.append({
-            'variable': field['nix'],
+            'variable': field['key'],
             'value': cfg.get(field['key'], ''),
         })
     generator.RewriteConfiguration(
